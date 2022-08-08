@@ -6,7 +6,7 @@ class NERStackingDataset(torch.utils.data.Dataset):
         self.labels = labels
         self.token_dict = token_dict
     def get_embedding(self, tokens):
-        return np.stack([self.token_dict[token] for token in tokens])
+        return np.stack([self.token_dict[token].cpu() for token in tokens])
 
     def __getitem__(self, idx):
         data = self.data_list[idx]
