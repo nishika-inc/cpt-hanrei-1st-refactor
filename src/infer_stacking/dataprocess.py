@@ -201,7 +201,31 @@ def create_test_data(trail_name):
         path = f"../data/preprocessed/test_stacking_data_{fold}.pk"
         save_as_pickle(path,test_data_list)
 
+
+def create_mean_test_data():
+    test_df = pd.read_csv("../data/input/test_token.csv").dropna().reset_index(drop=True)
+    file_ids = test_df.file_id.unique()
+    mean_test_data_list = []
+    for i in range(len(file_ids)):
+        mean_test_data_list.append({'logits':[],'tokens':[]})
+    for fold in range(5):
+        test_path = f"../data/preprocessed/test_stacking_data_{fold}.pk"
+        test_data_list = load_pickle(test_path)
+        for i in range(len(file_ids)):
+            test_data = test_data_list[i]
+            logits = test_data['logits']
+            tokens = test_data['tokens']
+            mean_test_data_list[i]['logits'].append(logits)
+            if fold == 0:
+                mean_test_data_list[i]['tokens'] = tokens
+    for i in range(len(file_ids)):
+        mean_test_data_list[i]['logits'] = torch.mean(torch.stack(mean_test_data_list[i]['logits']), dim=0)
+    test_path = "../data/preprocessed/test_stacking_data_mean.pk"
+    save_as_pickle(test_path, mean_test_data_list)
+
+
 if __name__ == '__main__':
     trail_name = "seed_data_for_each_model"
     create_test_data(trail_name)
+    create_mean_test_data()
 
